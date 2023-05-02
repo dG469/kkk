@@ -1,0 +1,282 @@
+using MySql.Data.MySqlClient;
+
+private List<RowOfData> _data = new List<RowOfData>();//создаем список данных
+
+private void AddDataGrid(RowOfData row)
+        {
+            dataGridView1.Rows.Add(row.idOrder_Info, row.product, row.user, row.user_login, row.workers, row.quantity, row.date_order, row.date_delivery, row.summ);
+            //добавляем строку в таблицу
+        }
+        
+        
+private void HeaderOfTheTable()
+        {
+            var column1 = new DataGridViewColumn();
+            column1.HeaderText = "Номер"; //текст в шапке
+            column1.Width = 50; //ширина колонки
+            column1.Name = "idOrder_Info"; //текстовое имя колонки, его можно использовать вместо обращений по индексу
+            column1.Frozen = false; //флаг, что данная колонка всегда отображается на своем месте
+            column1.CellTemplate = new DataGridViewTextBoxCell(); //тип нашей колонки
+
+            var column2 = new DataGridViewColumn();
+            column2.HeaderText = "Продукт";
+            column2.Width = 300;
+            column2.Name = "product";
+            column2.CellTemplate = new DataGridViewTextBoxCell();
+
+            var column3 = new DataGridViewColumn();
+            column3.HeaderText = "Выполнил заказ";
+            column3.Width = 120;
+            column3.Name = "workers";
+            column3.CellTemplate = new DataGridViewTextBoxCell();
+
+            var column4 = new DataGridViewColumn();
+            column4.HeaderText = "Заказчик";
+            column4.Width = 120;
+            column4.Name = "user";
+            column4.CellTemplate = new DataGridViewTextBoxCell();
+
+            var column5 = new DataGridViewColumn();
+            column5.HeaderText = "Логин";
+            column5.Width = 120;
+            column5.Name = "user_login";
+            column5.CellTemplate = new DataGridViewTextBoxCell();
+
+            var column6 = new DataGridViewColumn();
+            column6.HeaderText = "Количество";
+            column6.Width = 120;
+            column6.Name = "quantity";
+            column6.CellTemplate = new DataGridViewTextBoxCell();
+
+            var column7 = new DataGridViewColumn();
+            column7.HeaderText = "Дата заказа";
+            column7.Width = 120;
+            column7.Name = "date_order";
+            column7.CellTemplate = new DataGridViewTextBoxCell();
+
+            var column8 = new DataGridViewColumn();
+            column8.HeaderText = "Дата выполнения заказа";
+            column8.Width = 120;
+            column8.Name = "date_delivery";
+            column8.CellTemplate = new DataGridViewTextBoxCell();
+
+            var column9 = new DataGridViewColumn();
+            column9.HeaderText = "Сумма заказа";
+            column9.Width = 100;
+            column9.Name = "summ";
+            column9.CellTemplate = new DataGridViewTextBoxCell();
+
+            dataGridView1.Columns.Add(column1);
+            dataGridView1.Columns.Add(column2);
+            dataGridView1.Columns.Add(column3);
+            dataGridView1.Columns.Add(column4);
+            dataGridView1.Columns.Add(column5);
+            dataGridView1.Columns.Add(column6);
+            dataGridView1.Columns.Add(column7);
+            dataGridView1.Columns.Add(column8);
+            dataGridView1.Columns.Add(column9);
+            dataGridView1.AllowUserToAddRows = true; //запрешаем пользователю самому добавлять строки
+            dataGridView1.ReadOnly = false;//разрешаем менять данные
+        }
+        
+        
+        private void выбранныйToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (MessageBox.Show("Точно удалить данные?", "Внимание!", MessageBoxButtons.YesNo) == DialogResult.Yes)
+            {
+                foreach (DataGridViewRow row in dataGridView1.SelectedRows)
+                {
+                    
+                        //открываем базу данных и считываем с нее данные
+                        DatabaseManager _manager = new DatabaseManager();
+
+                        // Получаем ID строки из таблицы dataGridView1
+                        int id = Convert.ToInt32(row.Cells["idOrder_Info"].Value);
+
+                        MySqlCommand _command = new MySqlCommand("DELETE FROM `order_info` WHERE `idOrder_Info` = @idOrder_Info", _manager.GetConnection);
+                        _command.Parameters.AddWithValue("@idOrder_Info", id);
+                        try
+                        {
+                            _manager.OpenConnection();
+
+                            //выполянем запрос
+                            _command.ExecuteNonQuery();
+                            dataGridView1.Rows.Remove(row);                           
+                        }
+                        catch
+                        {
+                            MessageBox.Show("Ошибка удаления данных!", "Ошибка!");
+                        }
+                        finally
+                        {
+                            _manager.CloseConnection();
+                        }
+                     
+                 }
+             }
+        }
+        
+        private void выгрузитьToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+                if (MessageBox.Show("Добавить эти данные в базу данных?", "Внимание!", MessageBoxButtons.YesNo) == DialogResult.Yes)
+                {
+                    DatabaseManager _manager = new DatabaseManager();
+
+                    try
+                    {
+                        _manager.OpenConnection();
+
+                        foreach (DataGridViewRow row in dataGridView1.SelectedRows)
+                        {
+                            int i = row.Index;
+
+                            string _commandString = "INSERT INTO `order_info` (`product`, `workers`, `user`, `user_login`, `quantity`, `date_order`, `date_delivery`, `summ`) VALUES(@product, @workers, @user, @user_login, @quantity,  @date_order, @date_delivery, @summ)";
+                            MySqlCommand _command = new MySqlCommand(_commandString, _manager.GetConnection);
+
+                            _command.Parameters.Add("@product", MySqlDbType.VarChar).Value = this.dataGridView1.Rows[i].Cells[1].Value ?? DBNull.Value;
+                            _command.Parameters.Add("@workers", MySqlDbType.VarChar).Value = this.dataGridView1.Rows[i].Cells[2].Value ?? DBNull.Value;
+                            _command.Parameters.Add("@user", MySqlDbType.VarChar).Value = this.dataGridView1.Rows[i].Cells[3].Value ?? DBNull.Value;
+                            _command.Parameters.Add("@user_login", MySqlDbType.VarChar).Value = this.dataGridView1.Rows[i].Cells[3].Value ?? DBNull.Value;
+                            _command.Parameters.Add("@quantity", MySqlDbType.VarChar).Value = this.dataGridView1.Rows[i].Cells[4].Value ?? DBNull.Value;
+
+                            DateTime? date_order = this.dataGridView1.Rows[i].Cells[5].Value as DateTime?;
+                            if (date_order.HasValue)
+                                _command.Parameters.Add("@date_order", MySqlDbType.DateTime).Value = date_order.Value;
+                            else
+                                _command.Parameters.Add("@date_order", MySqlDbType.DateTime).Value = DBNull.Value;
+
+                            DateTime? date_delivery = this.dataGridView1.Rows[i].Cells[6].Value as DateTime?;
+                            if (date_delivery.HasValue)
+                                _command.Parameters.Add("@date_delivery", MySqlDbType.DateTime).Value = date_delivery.Value;
+                            else
+                                _command.Parameters.Add("@date_delivery", MySqlDbType.DateTime).Value = DBNull.Value;
+
+                            _command.Parameters.Add("@summ", MySqlDbType.Decimal).Value = this.dataGridView1.Rows[i].Cells[7].Value ?? DBNull.Value;
+
+                            _command.ExecuteNonQuery();
+
+                            MessageBox.Show("Данные были добавлены!", "Внимание!");
+                        }
+                    }
+                    finally
+                    {
+                        _manager.CloseConnection();
+                    }
+
+                }
+            
+        }
+        
+        private void изменитьToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            
+                if (MessageBox.Show("Точно изменить эти данные?", "Внимание!", MessageBoxButtons.YesNo) == DialogResult.Yes)
+                {
+                    DataGridViewRow selectedRow = dataGridView1.SelectedRows[0];
+                    if (dataGridView1.SelectedRows.Count != 0)
+                    {
+                        //изменяем данные
+                        string idOrder_info = Convert.ToString(selectedRow.Cells[0].Value);
+                        string product = Convert.ToString(selectedRow.Cells[1].Value);
+                        string workers = Convert.ToString(selectedRow.Cells[2].Value);
+                        string user = Convert.ToString(selectedRow.Cells[3].Value);
+                        string user_login = Convert.ToString(selectedRow.Cells[4].Value);
+                        string quantity = Convert.ToString(selectedRow.Cells[5].Value);
+                        string date_order_str = Convert.ToString(selectedRow.Cells[6].Value);
+                        DateTime? date_order = null;
+                        if (!string.IsNullOrEmpty(date_order_str))
+                            date_order = DateTime.Parse(date_order_str);
+                        string date_delivery_str = Convert.ToString(selectedRow.Cells[7].Value);
+                        DateTime? date_delivery = null;
+                        if (!string.IsNullOrEmpty(date_delivery_str))
+                            date_delivery = DateTime.Parse(date_delivery_str);
+                        decimal? summ = null;
+                        if (selectedRow.Cells[8].Value != null)
+                            summ = Convert.ToDecimal(selectedRow.Cells[8].Value);
+
+                        //открываем базу данных
+                        DatabaseManager _manager = new DatabaseManager();
+                        string _commandString = "UPDATE `order_info` SET `idOrder_Info` = @idOrder_info, `product` = @product, `workers` = @workers, `user` = @user, `user_login` = @user_login, `quantity` = @quantity,`date_order` = @date_order, `date_delivery` = @date_delivery, `summ` = @summ WHERE `order_info`.`idOrder_Info` = @idOrder_info";
+                        MySqlCommand _command = new MySqlCommand(_commandString, _manager.GetConnection);
+                        _command.Parameters.AddWithValue("@idOrder_info", idOrder_info);
+                        _command.Parameters.AddWithValue("@product", product);
+                        _command.Parameters.AddWithValue("@workers", workers);
+                        _command.Parameters.AddWithValue("@user", user);
+                        _command.Parameters.AddWithValue("@user_login", user_login);
+                        _command.Parameters.AddWithValue("@quantity", quantity);
+                        _command.Parameters.AddWithValue("@date_order", (object)date_order ?? DBNull.Value);
+                        _command.Parameters.AddWithValue("@date_delivery", (object)date_delivery ?? DBNull.Value);
+                        _command.Parameters.AddWithValue("@summ", (object)summ ?? DBNull.Value);
+
+                        try
+                        {
+                            _manager.OpenConnection();
+                            _command.ExecuteNonQuery();
+                            MessageBox.Show("Данные изменены!", "Внимание!");
+                        }
+                        catch (Exception ex)
+                        {
+                            MessageBox.Show("Ошибка работы с базой данных: " + ex.Message, "Ошибка!");
+                        }
+                        finally
+                        {
+                            _manager.CloseConnection();
+                        }
+                    }
+                
+
+            }
+            
+             //сортировка
+        private void dataGridView1_CellMouseClick(object sender, DataGridViewCellMouseEventArgs e)
+        {
+            // Проверяем, был ли щелчок по заголовку столбца
+            if (e.RowIndex == -1 && e.ColumnIndex >= 0 && e.ColumnIndex < dataGridView1.Columns.Count)
+            {
+                // получаем индекс столбца, на который был произведен щелчок мышью
+                int columnIndex = e.ColumnIndex;
+
+                DataGridViewColumn selectedColumn = dataGridView1.Columns[columnIndex];
+
+                // проверяем текущее состояние сортировки
+                ListSortDirection direction;
+                if (selectedColumn.HeaderCell.SortGlyphDirection == SortOrder.Ascending)
+                {
+                    direction = ListSortDirection.Descending;
+                }
+                else
+                {
+                    direction = ListSortDirection.Ascending;
+                }
+
+                // сортируем выбранный столбец в нужном направлении
+                dataGridView1.Sort(selectedColumn, direction);
+            }
+        }
+
+        private void dataGridView1_CellMouseDoubleClick(object sender, DataGridViewCellMouseEventArgs e)
+        {
+            // Проверяем, был ли щелчок по заголовку столбца
+            if (e.RowIndex == -1 && e.ColumnIndex >= 0 && e.ColumnIndex < dataGridView1.Columns.Count)
+            {
+                // получаем индекс столбца, на который был произведен щелчок мышью
+                int columnIndex = e.ColumnIndex;
+
+                DataGridViewColumn selectedColumn = dataGridView1.Columns[columnIndex];
+
+                // проверяем текущее состояние сортировки
+                ListSortDirection direction;
+                if (selectedColumn.HeaderCell.SortGlyphDirection == SortOrder.Descending)
+                {
+                    direction = ListSortDirection.Ascending;
+                }
+                else
+                {
+                    direction = ListSortDirection.Descending;
+                }
+
+                // сортируем выбранный столбец в нужном направлении
+                dataGridView1.Sort(selectedColumn, direction);
+            }
+        }
+        
