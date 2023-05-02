@@ -1,0 +1,28 @@
+using MySql.Data.MySqlClient;
+
+ //создаем поле данных соединения с MySql
+        MySqlConnection connection = new MySqlConnection(
+            "server=localhost;" +
+            "port=3306;" +
+            "username=root;" +
+            "password=123456789;" +
+            "database=ispr23-35_trusovdr");
+
+        //метод, который открывает соединение
+        public void OpenConnection()
+        {
+            //проверяем состояние подключения
+            if (connection.State == System.Data.ConnectionState.Closed)
+                connection.Open();
+        }
+
+        //закрываем соединение
+        public void CloseConnection()
+        {
+            //проверяем, есть ли соединение 
+            if (connection.State == System.Data.ConnectionState.Open)
+                connection.Close();
+        }
+
+        //возращаем значения объекта соединения
+        public MySqlConnection GetConnection { get { return connection; } }
