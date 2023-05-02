@@ -21,13 +21,16 @@ private void Button1_Click(object sender, EventArgs e)
                 _mySqlDataAdapter.SelectCommand = _mySqlCommand;
                 _mySqlDataAdapter.Fill(_dataTable);//заполянем данные в табличку
 
-                if (_dataTable.Rows.Count > 0)
-                {
-                  
+                if (loginUser == "admin" || loginUser == "manager")
+                    {
                         DataUploadForm form1 = new DataUploadForm();
                         this.Hide();
                         form1.Show();
-                }              
+                    }
+                    else
+                    {DataForm form = new DataForm();
+                    this.Hide();
+                    form.Show(); } 
             }
             catch
             {
