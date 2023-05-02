@@ -1,0 +1,122 @@
+using MySql.Data.MySqlClient;
+
+
+ private void HeaderOfTheTable()
+        {
+            var column1 = new DataGridViewColumn();
+            column1.HeaderText = "Номер заказа"; //текст в шапке
+            column1.Width = 50; //ширина колонки
+            column1.Name = "idOrder_Info"; //текстовое имя колонки, его можно использовать вместо обращений по индексу
+            column1.Frozen = true; //флаг, что данная колонка всегда отображается на своем месте
+            column1.CellTemplate = new DataGridViewTextBoxCell(); //тип нашей колонки
+            column1.Visible = true;
+
+            var column2 = new DataGridViewColumn();
+            column2.HeaderText = "Продукт";
+            column2.Width = 300;
+            column2.Name = "product";
+            column2.CellTemplate = new DataGridViewTextBoxCell();
+
+            var column3 = new DataGridViewColumn();
+            column3.HeaderText = "Выполнил заказ";
+            column3.Width = 120;
+            column3.Name = "workers";
+            column3.CellTemplate = new DataGridViewTextBoxCell();
+
+            var column4 = new DataGridViewColumn();
+            column4.HeaderText = "Заказчик";
+            column4.Width = 120;
+            column4.Name = "user";
+            column4.CellTemplate = new DataGridViewTextBoxCell();
+
+            var column5 = new DataGridViewColumn();
+            column5.HeaderText = "Логин";
+            column5.Width = 120;
+            column5.Name = "user_login";
+            column5.CellTemplate = new DataGridViewTextBoxCell();
+            column5.Visible = false;
+
+            var column6 = new DataGridViewColumn();
+            column6.HeaderText = "Количество";
+            column6.Width = 120;
+            column6.Name = "quantity";
+            column6.CellTemplate = new DataGridViewTextBoxCell();
+
+            var column7 = new DataGridViewColumn();
+            column7.HeaderText = "Дата заказа";
+            column7.Width = 120;
+            column7.Name = "date_order";
+            column7.CellTemplate = new DataGridViewTextBoxCell();
+
+            var column8 = new DataGridViewColumn();
+            column8.HeaderText = "Дата выполнения заказа";
+            column8.Width = 120;
+            column8.Name = "date_delivery";
+            column8.CellTemplate = new DataGridViewTextBoxCell();
+
+            var column9 = new DataGridViewColumn();
+            column9.HeaderText = "Сумма заказа";
+            column9.Width = 100;
+            column9.Name = "summ";
+            column9.CellTemplate = new DataGridViewTextBoxCell();
+
+            dataGridView1.Columns.Add(column1);
+            dataGridView1.Columns.Add(column2);
+            dataGridView1.Columns.Add(column3);
+            dataGridView1.Columns.Add(column4);
+            dataGridView1.Columns.Add(column5);
+            dataGridView1.Columns.Add(column6);
+            dataGridView1.Columns.Add(column7);
+            dataGridView1.Columns.Add(column8);
+            dataGridView1.Columns.Add(column9);
+            dataGridView1.AllowUserToAddRows = false; //запрешаем пользователю самому добавлять строки
+            dataGridView1.ReadOnly = true;//запрещаем пользователю изменять данные (!!!)
+        }
+
+        //добавление данных в табицу
+        private void AddDataGrid(RowOfData row)
+        {
+            dataGridView1.Rows.Add(row.idOrder_Info, row.product, row.user, row.user_login, row.workers, row.quantity, row.date_order, row.date_delivery, row.summ);//добавляем строку в таблицу
+        }
+        private void DataForm_Shown(object sender, EventArgs e)
+        {
+            //создаем объект класса пользователь
+            user = new User();
+            materialLabelUser.Text = user.userName;
+            HeaderOfTheTable();//создаем шапку таблицы
+            List<RowOfData> _data = new List<RowOfData>();//создаем список данных
+
+            //открываем базу данных и считываем с нее данные
+            DatabaseManager _manager = new DatabaseManager();
+            MySqlCommand _command = new MySqlCommand("SELECT * FROM `order_info` WHERE `user_login` = @userLogin", _manager.GetConnection);
+
+            _command.Parameters.AddWithValue("@userLogin", user.userName);
+
+            MySqlDataReader _reader;
+
+            try
+            {
+                _manager.OpenConnection();
+                _reader = _command.ExecuteReader();
+
+                while (_reader.Read())
+                {
+                    //заполняем данные
+                    RowOfData row = new RowOfData(_reader["idOrder_Info"], _reader["product"], _reader["workers"], _reader["user"], _reader["user_login"], _reader["quantity"], _reader["date_order"], _reader["date_delivery"], _reader["summ"]);
+                    _data.Add(row);
+                }
+
+                //добавляем в таблицу данные
+                for (int i = 0; i < _data.Count; i++)
+                    AddDataGrid(_data[i]);
+
+            }
+            catch
+            {
+                MessageBox.Show("Ошибка работы с базой данных!", "Ошибка!");
+            }
+            finally
+            {
+                _manager.CloseConnection();
+            }
+        }
