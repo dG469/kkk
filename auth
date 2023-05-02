@@ -1,0 +1,41 @@
+using MySql.Data.MySqlClient;
+
+private void Button1_Click(object sender, EventArgs e)
+        {
+            string loginUser = TextBoxLogin.Text;
+            string passwordUser = TextBoxPassword.Text;
+
+
+            DatabaseManager _databaseManager = new DatabaseManager();
+            DataTable _dataTable = new DataTable();
+            MySqlDataAdapter _mySqlDataAdapter = new MySqlDataAdapter();
+            MySqlCommand _mySqlCommand = new MySqlCommand("SELECT * FROM `users` WHERE `login` = @login AND `password` = @passwordUser", _databaseManager.GetConnection);//выбираем все записи из таблички user где логин = введеному логину и пароль = введеному паролю
+            try
+            {
+                //меняем заглушки на переменные
+                _mySqlCommand.Parameters.Add("@login", MySqlDbType.VarChar).Value = loginUser;
+                _mySqlCommand.Parameters.Add("@passwordUser", MySqlDbType.VarChar).Value = passwordUser;
+
+                _databaseManager.OpenConnection();//открываем соединение
+
+                _mySqlDataAdapter.SelectCommand = _mySqlCommand;
+                _mySqlDataAdapter.Fill(_dataTable);//заполянем данные в табличку
+
+                if (_dataTable.Rows.Count > 0)
+                {
+                  
+                        DataUploadForm form1 = new DataUploadForm();
+                        this.Hide();
+                        form1.Show();
+                }              
+            }
+            catch
+            {
+                MessageBox.Show("Ошибка работы с базой данных!", "Ошибка");
+            }
+            finally
+            {
+                _databaseManager.CloseConnection();//закрываем соединение
+            }
+
+        }
