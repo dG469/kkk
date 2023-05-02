@@ -1,0 +1,39 @@
+//тут перечисляем поля, которые указаны в базе данных
+        public object idOrder_Info { get; set; }
+        public object product { get; set; }
+        public object user { get; set; }
+        public object user_login { get; set; }
+        public object workers{ get; set; }
+        public object quantity { get; set; }
+        public object date_order { get; set; }
+        public object date_delivery { get; set; }
+        public object summ { get; set; }
+
+        //конструкторы класса
+        public RowOfData() { }
+        public RowOfData(object _idOrder_Info, object _product, object _user, object _user_login, object _workers, object _quantity, object _date_order, object _date_delivery, object _summ)
+        {
+            idOrder_Info = _idOrder_Info;
+            product = _product;
+            user = _user;
+            user_login = _user_login;
+            workers = _workers;
+            quantity = _quantity;
+            date_order = _date_order;
+            date_delivery = _date_delivery;
+            summ = _summ;
+        }
+
+        //методы класса
+        public void DataChange(object _idOrder_Info, object _product, object _user, object _user_login, object _workers, object _quantity, object _date_order, object _date_delivery, object _summ)
+        {
+            idOrder_Info = _idOrder_Info;
+            product = _product;
+            user = _user;
+            user_login = _user_login;
+            workers = _workers;
+            quantity = _quantity;
+            date_order = _date_order;
+            date_delivery = _date_delivery;
+            summ = _summ;
+        }
